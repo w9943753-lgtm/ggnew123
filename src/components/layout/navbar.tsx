@@ -27,6 +27,7 @@ export default function Navbar() {
   const [user, setUser] = useState<SupaUser | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [logo, setLogo] = useState<string>("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const itemCount = useCartStore((s) => s.getItemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
@@ -35,9 +36,24 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      if (data.user) {
+        supabase.from("users").select("role").eq("id", data.user.id).single().then(({ data: userData }) => {
+          if (userData?.role === "admin") setIsAdmin(true);
+        });
+      }
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        supabase.from("users").select("role").eq("id", session.user.id).single().then(({ data: userData }) => {
+          if (userData?.role === "admin") setIsAdmin(true);
+          else setIsAdmin(false);
+        });
+      } else {
+        setIsAdmin(false);
+      }
     });
     supabase.from("settings").select("value").eq("key", "logo").single().then(({ data }) => {
       if (data?.value) setLogo(JSON.parse(data.value as string));
@@ -61,7 +77,7 @@ export default function Navbar() {
               <Phone className="w-3 h-3" />
               helpline@hafizstore.pk
             </span>
-            <span>Free delivery above Rs. 3000</span>
+            <span>Free delivery above Rs. 2,000</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/track-order" className="hover:underline">Track Order</Link>
@@ -93,13 +109,11 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
-              <div className="flex items-center gap-2">
-                {logo ? (
-                  <img src={logo} alt="Hafiz Store" className="h-10 w-auto object-contain" />
-                ) : (
-                  <h1 className="text-2xl font-bold text-secondary">{SITE_NAME}</h1>
-                )}
-              </div>
+              {logo ? (
+                <img src={logo} alt="Hafiz Store" className="h-16 md:h-20 w-auto object-contain" />
+              ) : (
+                <h1 className="text-2xl font-bold text-secondary">{SITE_NAME}</h1>
+              )}
             </Link>
 
             {/* City selector - Desktop */}
@@ -229,6 +243,11 @@ export default function Navbar() {
                           <Link href="/orders" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setShowUserMenu(false)}>
                             <Package className="w-4 h-4" /> My Orders
                           </Link>
+                          {isAdmin && (
+                            <Link href="/admin/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 font-medium" onClick={() => setShowUserMenu(false)}>
+                              <Settings className="w-4 h-4" /> Admin Panel
+                            </Link>
+                          )}
                           <hr className="my-1 border-gray-100" />
                           <button
                             onClick={async () => {

@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  ShoppingCart,
-  Heart,
   ChevronRight,
   ChevronLeft,
   Clock,
@@ -21,8 +19,6 @@ import {
 import Link from "next/link";
 import { cn, getBrandName } from "@/utils";
 import { formatPrice, calculateDiscount } from "@/utils";
-import { useCartStore } from "@/store/cart";
-import { useWishlistStore } from "@/store/wishlist";
 import type { Product, Category } from "@/types";
 import PlaceholderImage from "@/components/ui/placeholder-image";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -42,13 +38,12 @@ function HeroSection({ logo, settings }: { logo?: string; settings?: any }) {
 
   return (
     <section
-      className="relative text-white overflow-hidden"
+      className="relative overflow-hidden"
       style={{
         background: bgImage ? `url(${bgImage}) center/cover` : bgColor,
-        color: textColor,
       }}
     >
-      {!bgImage && <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent" />}
+      <div className="absolute inset-0 bg-black/40" />
       <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-20 flex flex-col md:flex-row items-center gap-8">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -62,12 +57,12 @@ function HeroSection({ logo, settings }: { logo?: string; settings?: any }) {
           <span className="inline-block bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wide">
             Mega Sale
           </span>
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 text-orange-400" style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.5)" }}>
             Fresh Groceries{" "}
-            <span className="text-orange-400">Delivered</span> to Your Door
+            Delivered to your door step
           </h1>
-          <p className="text-lg md:text-xl mb-6 max-w-xl opacity-90">
-            Up to 50% off on daily essentials. Shop now and get free delivery on orders above Rs. 1,000.
+          <p className="text-lg md:text-xl mb-6 max-w-xl text-orange-200" style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>
+            Quality daily essentials delivered fresh to your home.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
             <Link
@@ -82,16 +77,6 @@ function HeroSection({ logo, settings }: { logo?: string; settings?: any }) {
             >
               View Deals
             </Link>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex-1 flex justify-center"
-        >
-          <div className="relative w-64 h-64 md:w-80 md:h-80 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm">
-            <PlaceholderImage name="Fresh Groceries" className="w-48 h-48 md:w-60 md:h-60 rounded-2xl shadow-2xl" />
           </div>
         </motion.div>
       </div>
@@ -200,9 +185,6 @@ function ProductSlider({
   title: string;
   viewAllHref: string;
 }) {
-  const addItem = useCartStore((s) => s.addItem);
-  const addWishlistItem = useWishlistStore((s) => s.addItem);
-
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-8">
@@ -267,19 +249,16 @@ function ProductSlider({
                   </div>
                 </div>
               </Link>
-              <div className="px-4 pb-4 flex gap-2">
-                <button
-                  onClick={() => addItem(product, 1)}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+              <div className="px-4 pb-4">
+                <a
+                  href={`https://wa.me/923044124129?text=${encodeURIComponent(`Hi, I want to order: ${product.name}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                 >
-                  <ShoppingCart className="w-4 h-4" /> Add
-                </button>
-                <button
-                  onClick={() => addWishlistItem(product.id)}
-                  className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors"
-                >
-                  <Heart className="w-4 h-4 text-gray-400 hover:text-red-500" />
-                </button>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Order on WhatsApp
+                </a>
               </div>
             </div>
           </motion.div>
@@ -301,7 +280,7 @@ function PromoWidgets() {
         >
           <Zap className="w-8 h-8 mb-3 text-orange-300" />
           <h3 className="text-lg font-bold mb-2">Free Delivery</h3>
-          <p className="text-sm text-green-100">On orders above Rs. 1,000. Fast and reliable delivery.</p>
+          <p className="text-sm text-green-100">On orders above Rs. 2,000. Fast and reliable delivery.</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -332,7 +311,7 @@ function PromoWidgets() {
 
 function TrustBadges() {
   const badges = [
-    { icon: Truck, label: "Free Delivery", sub: "Orders over Rs. 1,000" },
+    { icon: Truck, label: "Free Delivery", sub: "Orders over Rs. 2,000" },
     { icon: Shield, label: "Secure Payment", sub: "100% Protected" },
     { icon: RotateCcw, label: "Easy Returns", sub: "7-Day Return Policy" },
     { icon: Headphones, label: "24/7 Support", sub: "Dedicated Help Center" },
@@ -604,15 +583,15 @@ export default function HomePage() {
               Limited Time
             </span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2">
-              Mega Sale Up to <span className="text-orange-400">50% OFF</span>
+              Fresh Groceries <span className="text-orange-400">& More</span>
             </h2>
-            <p className="text-green-100">On hundreds of grocery items. Shop before the sale ends!</p>
+            <p className="text-green-100">Quality products delivered fresh to your doorstep. Shop now!</p>
           </div>
           <Link
             href="/categories"
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-xl text-lg transition-colors shadow-lg whitespace-nowrap"
           >
-            Shop Mega Sale
+            Shop Now
           </Link>
         </div>
       </motion.section>

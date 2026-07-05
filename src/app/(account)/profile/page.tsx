@@ -56,6 +56,7 @@ export default function ProfilePage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isProfileSaving, setIsProfileSaving] = useState(false);
   const [isPasswordSaving, setIsPasswordSaving] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const {
     register: registerProfile,
@@ -79,6 +80,7 @@ export default function ProfilePage() {
       const { data } = await supabase.from("users").select("*").eq("id", user.id).single();
       if (data) {
         reset({ fullName: data.full_name || "", email: data.email || "", phone: data.phone || "" });
+        setIsAdmin(data.role === "admin");
       }
     }
     loadProfile();
@@ -148,6 +150,12 @@ export default function ProfilePage() {
             <Bell className="w-5 h-5 text-secondary" />
             <span className="text-xs font-medium">Notifications</span>
           </Link>
+          {isAdmin && (
+            <Link href="/admin/dashboard" className="flex flex-col items-center gap-1 p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors border border-orange-200">
+              <Shield className="w-5 h-5 text-orange-600" />
+              <span className="text-xs font-medium text-orange-700">Admin Panel</span>
+            </Link>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg shadow-green-100/30 border border-green-100/50 p-6">

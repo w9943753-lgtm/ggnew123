@@ -12,8 +12,6 @@ export const COLORS = {
 
 export const CATEGORIES = [
   "Grocery",
-  "Fresh Vegetables",
-  "Fresh Fruits",
   "Meat & Fish",
   "Dairy & Eggs",
   "Bakery",
@@ -26,10 +24,9 @@ export const CATEGORIES = [
   "Baby Care",
   "Health",
   "Beauty",
-  "Pet Food",
-  "Stationery",
-  "Electronics",
-  "Kitchen",
+  "Chinese Sauces",
+  "Imported Items",
+  "Packing Material",
 ] as const;
 
 export const PAYMENT_METHODS = [
@@ -65,7 +62,7 @@ export const PAKISTAN_CITIES = [
   "Abbottabad",
 ] as const;
 
-export const FREE_DELIVERY_THRESHOLD = 3000;
+export const FREE_DELIVERY_THRESHOLD = 2000;
 export const DELIVERY_CHARGE = 200;
 export const TAX_RATE = 0;
 

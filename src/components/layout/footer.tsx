@@ -1,10 +1,21 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, Globe, Camera, Play, Send } from "lucide-react";
-import { SITE_NAME, SITE_URL } from "@/constants";
+import { SITE_NAME } from "@/constants";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Footer() {
+  const [logo, setLogo] = useState<string>("");
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from("settings").select("value").eq("key", "logo").single().then(({ data }) => {
+      if (data?.value) setLogo(JSON.parse(data.value as string));
+    });
+  }, []);
+
   return (
     <footer className="bg-gray-900 text-gray-300 mt-auto">
       {/* Newsletter */}
@@ -35,16 +46,22 @@ export default function Footer() {
           {/* About */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-lg">{SITE_NAME}</h3>
-                <p className="text-xs text-gray-400">Quality Groceries</p>
-              </div>
+              {logo ? (
+                <img src={logo} alt={SITE_NAME} className="h-12 w-auto object-contain" />
+              ) : (
+                <>
+                  <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">H</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-lg">{SITE_NAME}</h3>
+                    <p className="text-xs text-gray-400">Quality Groceries</p>
+                  </div>
+                </>
+              )}
             </div>
             <p className="text-sm leading-relaxed mb-4">
-              Your trusted online grocery store in Pakistan. We deliver fresh, quality groceries right to your doorstep at the best prices.
+              Your trusted online grocery IN LAHORE. We deliver fresh, quality groceries right to your doorstep at the best prices.
             </p>
             <div className="flex items-center gap-3">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
@@ -77,7 +94,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold mb-4">Top Categories</h4>
             <ul className="space-y-2.5">
-              {["Fresh Vegetables", "Fresh Fruits", "Meat & Fish", "Dairy & Eggs", "Snacks", "Beverages", "Cooking Essentials", "Personal Care"].map((cat) => (
+              {["Meat & Fish", "Dairy & Eggs", "Snacks", "Beverages", "Cooking Essentials", "Personal Care", "Chinese Sauces", "Imported Items", "Packing Material"].map((cat) => (
                 <li key={cat}>
                   <Link href={`/category/${cat.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`} className="text-sm hover:text-secondary transition-colors">
                     {cat}
@@ -93,11 +110,11 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                <p className="text-sm">Main Market, Lahore, Punjab, Pakistan</p>
+                <p className="text-sm">Shadewal Johar Town Near Beacon House School Lahore</p>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-secondary flex-shrink-0" />
-                <p className="text-sm">+92 300 0000000</p>
+                <p className="text-sm">0304-4124129 / 0304-4000465</p>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-secondary flex-shrink-0" />
@@ -105,7 +122,10 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-secondary flex-shrink-0" />
-                <p className="text-sm">Mon - Sun: 8:00 AM - 11:00 PM</p>
+                <div className="text-sm">
+                  <p>Mon - Sat: 8:00 AM - 9:00 PM</p>
+                  <p>Sunday: Closed</p>
+                </div>
               </div>
             </div>
 

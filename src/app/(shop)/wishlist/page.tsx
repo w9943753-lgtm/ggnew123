@@ -1,11 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ShoppingCart, Trash2, ShoppingBag } from "lucide-react";
+import { Heart, Trash2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { formatPrice, getBrandName } from "@/utils";
+import { formatPrice } from "@/utils";
 import { useWishlistStore } from "@/store/wishlist";
-import { useCartStore } from "@/store/cart";
 import type { Product } from "@/types";
 import PlaceholderImage from "@/components/ui/placeholder-image";
 
@@ -19,16 +18,10 @@ const demoProducts: Product[] = [
 
 export default function WishlistPage() {
   const { items: wishlistIds, removeItem } = useWishlistStore();
-  const addItem = useCartStore((s) => s.addItem);
 
   const products = wishlistIds
     .map((id) => demoProducts.find((p) => p.id === id))
     .filter((p): p is Product => p !== undefined);
-
-  const handleAddToCart = (product: Product) => {
-    addItem(product, 1);
-    removeItem(product.id);
-  };
 
   if (wishlistIds.length === 0) {
     return (
@@ -108,12 +101,14 @@ export default function WishlistPage() {
                     </div>
                   </Link>
                   <div className="px-4 pb-4">
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    <a
+                      href={`https://wa.me/923044124129?text=${encodeURIComponent(`Hi, I want to order: ${product.name}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                     >
-                      <ShoppingCart className="w-4 h-4" /> Add to Cart
-                    </button>
+                      Order on WhatsApp
+                    </a>
                   </div>
                 </div>
               </motion.div>
