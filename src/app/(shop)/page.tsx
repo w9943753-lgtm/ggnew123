@@ -52,7 +52,9 @@ function HeroSection({ logo, settings }: { logo?: string; settings?: any }) {
           className="flex-1 text-center md:text-left"
         >
           {logo && (
-            <img src={logo} alt="Hafiz Store" className="h-16 w-auto object-contain mb-4" />
+            <div className="inline-block bg-white/90 backdrop-blur-sm rounded-2xl p-3 mb-4 shadow-lg">
+              <img src={logo} alt="Hafiz Store" className="h-14 w-auto object-contain" />
+            </div>
           )}
           <span className="inline-block bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wide">
             Mega Sale
@@ -225,10 +227,10 @@ function ProductSlider({
                   <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-2 group-hover:text-green-600 transition-colors">
                     {product.name}
                   </h3>
-                  <div className="flex items-center gap-1 mb-2">
+                   <div className="flex items-center gap-1 mb-2">
                     <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
                     <span className="text-xs text-gray-600 font-medium">
-                      {product.rating} ({product.reviews_count})
+                      {product.rating > 0 ? product.rating : ""} {product.reviews_count > 0 ? `(${product.reviews_count})` : ""}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

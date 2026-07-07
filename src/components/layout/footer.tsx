@@ -47,7 +47,9 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               {logo ? (
-                <img src={logo} alt={SITE_NAME} className="h-12 w-auto object-contain" />
+                <div className="bg-white rounded-xl p-2">
+                  <img src={logo} alt={SITE_NAME} className="h-10 w-auto object-contain" />
+                </div>
               ) : (
                 <>
                   <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center">
@@ -80,7 +82,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2.5">
-              {["About Us", "Contact", "FAQs", "Terms & Conditions", "Privacy Policy", "Return Policy", "Track Order"].map((link) => (
+              {["About Us", "Contact", "FAQs", "Terms & Conditions", "Privacy Policy", "Return Policy"].map((link) => (
                 <li key={link}>
                   <Link href={`/${link.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`} className="text-sm hover:text-secondary transition-colors">
                     {link}

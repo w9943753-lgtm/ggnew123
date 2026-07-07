@@ -105,7 +105,7 @@ export default function ProductCard({
               </svg>
             ))}
           </div>
-          <span className="text-xs text-muted">({product.reviews_count})</span>
+          {product.reviews_count > 0 && <span className="text-xs text-muted">({product.reviews_count})</span>}
         </div>
 
         <div className="flex items-center gap-2 mt-2">

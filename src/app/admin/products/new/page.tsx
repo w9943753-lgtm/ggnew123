@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { ArrowLeft, Upload, X, Loader2, ImageIcon, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function NewProductPage() {
@@ -15,6 +15,7 @@ export default function NewProductPage() {
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string; parent_id: string | null }[]>([]);
   const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
 
@@ -23,6 +24,7 @@ export default function NewProductPage() {
     category_id: "", subcategory_id: "", brand_id: "",
     weight: "", unit: "kg", price: "", discount_price: "", stock: "",
     is_featured: false, is_popular: false, is_top_seller: false,
+    features: "", usage: "",
   });
 
   const [mainImage, setMainImage] = useState<string>("");
@@ -50,13 +52,40 @@ export default function NewProductPage() {
     }));
   };
 
+  const handleGenerateAI = async () => {
+    if (!form.name) {
+      alert("Please enter a product name first");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const catName = parentCategories.find((c) => c.id === form.category_id)?.name || "";
+      const res = await fetch("/api/generate-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, category: catName, weight: form.weight }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setForm((prev) => ({
+        ...prev,
+        description: data.description || prev.description,
+        features: data.features?.join("\n") || prev.features,
+        usage: data.usage?.join("\n") || prev.usage,
+      }));
+    } catch (err) {
+      alert("Failed to generate: " + (err instanceof Error ? err.message : "Unknown error"));
+    }
+    setGenerating(false);
+  };
+
   const handleFileUpload = async (files: FileList | null, isGallery = false) => {
     if (!files?.length) return;
     setUploading(true);
     for (const file of Array.from(files)) {
       const ext = file.name.split(".").pop();
       const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(isGallery ? "products" : "products").upload(path, file);
+      const { error } = await supabase.storage.from("products").upload(path, file);
       if (!error) {
         const { data } = supabase.storage.from("products").getPublicUrl(path);
         if (isGallery) {
@@ -88,7 +117,7 @@ export default function NewProductPage() {
       ? Math.round(((Number(form.price) - Number(form.discount_price)) / Number(form.price)) * 100)
       : 0;
 
-    const { error } = await supabase.from("products").insert({
+    const insertData: any = {
       name: form.name,
       slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
       description: form.description,
@@ -109,12 +138,31 @@ export default function NewProductPage() {
       is_top_seller: form.is_top_seller,
       rating: 0,
       reviews_count: 0,
-    });
+    };
+
+    const featuresArr = form.features ? form.features.split("\n").filter(Boolean) : [];
+    const usageArr = form.usage ? form.usage.split("\n").filter(Boolean) : [];
+
+    const { data: inserted, error } = await supabase.from("products").insert(insertData).select("id").single();
 
     setLoading(false);
     if (error) {
       alert("Error: " + error.message);
     } else {
+      // Try to update features/usage (works only if columns exist)
+      if (inserted?.id && (featuresArr.length || usageArr.length)) {
+        const updateData: any = {};
+        if (featuresArr.length) updateData.features = featuresArr;
+        if (usageArr.length) {
+          // Try usage_instructions first (safer column name), fallback to usage
+          const { error: e1 } = await supabase.from("products").update({ usage_instructions: usageArr }).eq("id", inserted.id);
+          if (e1) await supabase.from("products").update({ usage: usageArr }).eq("id", inserted.id);
+        }
+        if (featuresArr.length) {
+          await supabase.from("products").update({ features: featuresArr }).eq("id", inserted.id);
+        }
+      }
+      alert("Product created!");
       alert("Product created!");
       router.push("/admin/products");
     }
@@ -132,7 +180,18 @@ export default function NewProductPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Basic Information</h2>
+            <button
+              type="button"
+              onClick={handleGenerateAI}
+              disabled={generating || !form.name}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 text-sm font-medium transition-all"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {generating ? "Generating..." : "Generate with AI"}
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Product Name *</label>
@@ -147,6 +206,16 @@ export default function NewProductPage() {
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea name="description" value={form.description} onChange={handleChange} rows={3}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Features (one per line)</label>
+              <textarea name="features" value={form.features} onChange={handleChange} rows={3} placeholder="Premium quality&#10;Long lasting&#10;Family pack"
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Usage Instructions (one per line)</label>
+              <textarea name="usage" value={form.usage} onChange={handleChange} rows={3} placeholder="Use as directed&#10;Store in cool place&#10;Check expiry date"
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
             </div>
           </div>

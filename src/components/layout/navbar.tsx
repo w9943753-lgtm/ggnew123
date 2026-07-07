@@ -110,7 +110,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               {logo ? (
-                <img src={logo} alt="Hafiz Store" className="h-16 md:h-20 w-auto object-contain" />
+                <img src={logo} alt="Hafiz Store" className="h-14 md:h-16 w-auto object-contain" />
               ) : (
                 <h1 className="text-2xl font-bold text-secondary">{SITE_NAME}</h1>
               )}

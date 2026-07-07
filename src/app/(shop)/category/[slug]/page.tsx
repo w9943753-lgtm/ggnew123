@@ -343,7 +343,7 @@ export default function CategoryProductsPage() {
                         <div className="flex items-center gap-1 mb-2">
                           <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
                           <span className="text-xs text-gray-600 font-medium">
-                            {product.rating ?? 0} ({product.reviews_count ?? 0})
+                            {product.rating > 0 ? product.rating : ""} {product.reviews_count > 0 ? `(${product.reviews_count})` : ""}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
